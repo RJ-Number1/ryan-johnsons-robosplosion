@@ -5,13 +5,17 @@
 #include "Pins.h"
 #include <Servo.h>
 #include "Adafruit_VL53L0X.h"
+#include <Wire.h>
+#include <VL53L0X.h>
 
-Adafruit_VL53L0X frontRight = Adafruit_VL53L0X();
-Adafruit_VL53L0X frontLeft = Adafruit_VL53L0X();
-Adafruit_VL53L0X leftFront = Adafruit_VL53L0X();
-Adafruit_VL53L0X leftBack = Adafruit_VL53L0X();
-Adafruit_VL53L0X rightFront = Adafruit_VL53L0X();
-Adafruit_VL53L0X rightLeft = Adafruit_VL53L0X();
+
+
+VL53L0X frontRight;
+VL53L0X frontLeft;
+VL53L0X leftFront;
+VL53L0X leftBack;
+VL53L0X rightFront;
+VL53L0X rightLeft;
 
 
 #define xbeeComm Serial3
@@ -55,20 +59,9 @@ Serial.begin(9600);
   frontRight.init(true);
   frontRight.setAddress(0x50);
   
-
+}
 void loop() {
-  VL53L0X_RangingMeasurementData_t measure;
-    
-  Serial.print("Reading a measurement... ");
-  frontRight.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
-
-  if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
-  } else {
-    Serial.println(" out of range ");
-  }
-    
-  delay(100);
+  Serial.print(frontRight.readRangeContinuousMillimeters());
   newByte = xbeeComm.read();
 
   if (newByte != -1) {

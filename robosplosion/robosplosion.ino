@@ -6,7 +6,13 @@
 #include <Servo.h>
 #include "Adafruit_VL53L0X.h"
 
-Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+Adafruit_VL53L0X frontRight = Adafruit_VL53L0X();
+Adafruit_VL53L0X frontLeft = Adafruit_VL53L0X();
+Adafruit_VL53L0X leftFront = Adafruit_VL53L0X();
+Adafruit_VL53L0X leftBack = Adafruit_VL53L0X();
+Adafruit_VL53L0X rightFront = Adafruit_VL53L0X();
+Adafruit_VL53L0X rightLeft = Adafruit_VL53L0X();
+
 
 #define xbeeComm Serial3
 DriveMotors myMotors(MOTOR_LEFT_CH0, MOTOR_LEFT_CH1,
@@ -17,47 +23,57 @@ Servo mallet;
 byte newByte;
 
 void setup() {
+Serial.begin(9600);
+  xbeeComm.begin(9600);
+  mallet.attach(MALLET_PIN);
+  mallet.write(MALLET_RETRACT_POS);
+  while (! Serial) {
+    delay(1);
+  }
+   
   digitalWrite(SENSOR_LEFT_REAR,LOW);
   digitalWrite(SENSOR_LEFT_FRONT,LOW);
   digitalWrite(SENSOR_FRONT_LEFT,LOW);
   digitalWrite(SENSOR_FRONT_RIGHT,LOW);
-  digitalWrite(SENSOR_LEFT_FRONT,LOW);
-  digitalWrite(SENSOR_LEFT_REAR,LOW);
+  digitalWrite(SENSOR_RIGHT_FRONT,LOW);
+  digitalWrite(SENSOR_RIGHT_REAR,LOW);
   delay(10);
   digitalWrite(SENSOR_LEFT_REAR,HIGH);
-  lox.begin(0x30);
   digitalWrite(SENSOR_LEFT_FRONT,HIGH);
-  lox.begin(0x31);
   digitalWrite(SENSOR_FRONT_LEFT,HIGH);
-  lox.begin(0x32);
   digitalWrite(SENSOR_FRONT_RIGHT,HIGH);
-  lox.begin(0x33);
-  digitalWrite(SENSOR_LEFT_FRONT,HIGH);
-  lox.begin(0x34);
-  digitalWrite(SENSOR_LEFT_REAR,HIGH);
-  lox.begin(0x35);
+  digitalWrite(SENSOR_RIGHT_FRONT,HIGH);
+  digitalWrite(SENSOR_RIGHT_REAR,HIGH);
   
-  Serial.begin(9600);
-  xbeeComm.begin(9600);
-  mallet.attach(MALLET_PIN);
-  mallet.write(MALLET_RETRACT_POS);
+  digitalWrite(SENSOR_LEFT_REAR,HIGH);
+  digitalWrite(SENSOR_LEFT_FRONT,LOW);
+  digitalWrite(SENSOR_FRONT_LEFT,LOW);
+  digitalWrite(SENSOR_FRONT_RIGHT,LOW);
+  digitalWrite(SENSOR_RIGHT_FRONT,LOW);
+  digitalWrite(SENSOR_RIGHT_REAR,LOW);
+if (!frontRight.begin(0x50)) {
+    Serial.println(F("Failed to boot VL53L0X"));
+    while(1);
+  }
+  
+  digitalWrite(SENSOR_LEFT_FRONT,HIGH);
+  if (!frontRight.begin(0x49)) {
+    Serial.println(F("Failed to boot VL53L0X"));
+    while(1);
+  }
   
   while (!xbeeComm.available()) {
     // Just wait until something is received
     Serial.println("Waiting for a command...");
   }
-  Serial.println("we got it yo");
-  if (!lox.begin()) {
-    Serial.println(F("Failed to boot VL53L0X"));
-    while(1);
-  }
+  
 }
 
 void loop() {
   VL53L0X_RangingMeasurementData_t measure;
     
   Serial.print("Reading a measurement... ");
-  lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+  frontRight.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
 
   if (measure.RangeStatus != 4) {  // phase failures have incorrect data
     Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);

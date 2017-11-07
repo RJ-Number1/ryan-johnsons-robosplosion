@@ -10,12 +10,14 @@
 
 #define SENSOR_TOP_TRIG    3
 #define SENSOR_TOP_ECHO    2
+
 #define SENSOR_LEFT_REAR   53
 #define SENSOR_LEFT_FRONT  49
 #define SENSOR_FRONT_LEFT  47
 #define SENSOR_FRONT_RIGHT 43
-#define SENSOR_LEFT_FRONT  45
-#define SENSOR_LEFT_REAR   51
+#define SENSOR_RIGHT_FRONT  45
+#define SENSOR_RIGHT_REAR   51
+
 #define SENSOR_SDA         SDA
 #define SENSOR_SCL         SCL
 

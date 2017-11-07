@@ -51,23 +51,10 @@ Serial.begin(9600);
   digitalWrite(SENSOR_FRONT_RIGHT,LOW);
   digitalWrite(SENSOR_RIGHT_FRONT,LOW);
   digitalWrite(SENSOR_RIGHT_REAR,LOW);
-if (!frontRight.begin(0x50)) {
-    Serial.println(F("Failed to boot VL53L0X"));
-    while(1);
-  }
   
-  digitalWrite(SENSOR_LEFT_FRONT,HIGH);
-  if (!frontRight.begin(0x49)) {
-    Serial.println(F("Failed to boot VL53L0X"));
-    while(1);
-  }
+  frontRight.init(true);
+  frontRight.setAddress(0x50);
   
-  while (!xbeeComm.available()) {
-    // Just wait until something is received
-    Serial.println("Waiting for a command...");
-  }
-  
-}
 
 void loop() {
   VL53L0X_RangingMeasurementData_t measure;

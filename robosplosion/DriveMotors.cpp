@@ -25,26 +25,23 @@ DriveMotors::DriveMotors(const byte lm0, const byte lm1, const byte rm0, const b
   }
 }
 
-void DriveMotors::driveForward(const byte speed) {
+void DriveMotors::driveForward(const byte speedLeft, const byte speedRight) {
+
+ analogWrite(leftMotorCh0Pin, 0);
+  analogWrite(leftMotorCh1Pin, speedLeft);
+
+  analogWrite(rightMotorCh0Pin, 0);
+  analogWrite(rightMotorCh1Pin, speedRight);
+}
+
+
+void DriveMotors::driveReverse(const byte speed) {
   analogWrite(leftMotorCh0Pin, speed);
   analogWrite(leftMotorCh1Pin, 0);
 
   analogWrite(rightMotorCh0Pin, speed);
   analogWrite(rightMotorCh1Pin, 0);
 
-  if (DEBUG) {
-    DEBUG_SERIAL_PORT.print("[*] Driving forward (speed: ");
-    DEBUG_SERIAL_PORT.print(speed);
-    DEBUG_SERIAL_PORT.println(")");
-  }
-}
-
-void DriveMotors::driveReverse(const byte speed) {
-  analogWrite(leftMotorCh0Pin, 0);
-  analogWrite(leftMotorCh1Pin, speed);
-
-  analogWrite(rightMotorCh0Pin, 0);
-  analogWrite(rightMotorCh1Pin, speed);
 
   if (DEBUG) {
     DEBUG_SERIAL_PORT.print("[*] Driving in reverse (speed: ");
@@ -119,3 +116,5 @@ void DriveMotors::turnRight(const byte speed) {
     DEBUG_SERIAL_PORT.println(")");
   }
 }
+
+

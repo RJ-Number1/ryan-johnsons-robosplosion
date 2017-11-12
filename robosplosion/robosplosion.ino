@@ -1,3 +1,4 @@
+#include <PID_v1.h>
 #include "DriveMotors.h"
 #include "HCSR04.h"
 #include "Mallet.h"
@@ -18,12 +19,25 @@ DriveMotors myMotors(MOTOR_LEFT_CH0, MOTOR_LEFT_CH1,
 Sensors sensors;                    
 int leftSpeed = 150;
 int rightSpeed = 150;
-int targetDist = 0;
 
 boolean run = false;
 boolean dist = false;
 boolean test = false;
 bool forward = true;
+double targetDist;
+double LeftDist;
+double RightDist;
+
+//PID variables
+//double leftWheelInput, rightWheelInput, leftWheelOutput, rightWheelOutput;
+//float Kp=1;
+//float Ki=0;
+//float Kd=0;
+//PID leftWheelPID(&leftWheelInput, &leftWheelOutput, &targetDist, Kp, Ki, Kd, DIRECT);  
+//PID rightWheelPID(&rightWheelInput, &rightWheelOutput, &targetDist, Kp, Ki, Kd, DIRECT);
+//const long serialPing = 500;
+//unsigned long now = 0;
+//unsigned long lastMessage = 0;
 
 byte newByte;
 void setup() {
@@ -66,7 +80,15 @@ void setup() {
   frontRight.startContinuous();
   rightFront.startContinuous();
   rightBack.startContinuous();
+
+//  leftWheelPID.SetMode(AUTOMATIC);
+//  leftWheelPID.SetSampleTime(1);
+//  rightWheelPID.SetMode(AUTOMATIC);
+//  rightWheelPID.SetSampleTime(1);  
+//  lastMessage = millis(); 
 }
+
+
 void loop() {
   newByte = xbeeComm.read();
   int sensDriverFront = leftFront.readRangeSingleMillimeters();
@@ -75,7 +97,42 @@ void loop() {
   int sensPassBack = rightBack.readRangeSingleMillimeters();
   int sensFrontLeft = frontLeft.readRangeSingleMillimeters();
   int sensFrontRight = frontRight.readRangeSingleMillimeters();
-  
+//  now = millis(); 
+//  if(now - lastMessage > serialPing) {
+//    //Serial.println("ask for new gain");
+//    if (Serial.available() > 0) {
+//      for (int x = 0; x < 4; x++) {
+//        switch (x) {
+//        case 0:
+//          Kp = Serial.parseFloat();
+//          break;
+//        case 1:
+//          Ki = Serial.parseFloat();
+//          break;
+//        case 2:
+//          Kd = Serial.parseFloat();
+//          break;
+//        case 3:
+//          for (int y = Serial.available(); y == 0; y--) {
+//          Serial.read(); //Clear out any residual junk
+//          }
+//          break;
+//        }
+//      }
+//      Serial.print(" Kp,Ki,Kd = ");
+//      Serial.print(Kp);
+//      Serial.print(",");
+//      Serial.print(Ki);
+//      Serial.print(",");
+//      Serial.println(Kd); //Let us know what we just received
+//      leftWheelPID.SetTunings(Kp, Ki, Kd); //Set the PID gain constants and start running
+//      rightWheelPID.SetTunings(Kp, Ki, Kd); //Set the PID gain constants and start running
+//     }
+//     else {
+//      //Serial.println("not available");
+//     }
+//    lastMessage = now; //update the time stamp
+//  }
   
   
  if(run){
@@ -132,16 +189,33 @@ void loop() {
     rightSpeed = 50;
   }
   else if ((sensDriverFront < 300) && (sensPassFront < 300)) {
+    delay(100);
     int totalSpace = sensDriverFront + sensPassFront;
     targetDist = (float)totalSpace/2; 
     xbeeComm.println((String)"Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
-    leftSpeed = ((float)targetDist / (float)sensDriverFront) * baseSpeed;
-    rightSpeed = ((float)targetDist / (float)sensPassFront) * baseSpeed;
+//    leftWheelInput = (float)sensDriverFront;
+//    rightWheelInput = (float)sensPassFront;
+//    leftWheelPID.Compute();
+//    rightWheelPID.Compute();
+//    xbeeComm.println((String)"PID input | Left: " + leftWheelInput + " | Right: " + rightWheelInput);
+//    xbeeComm.println((String)"PID output | Left: " + leftWheelOutput + " | Right: " + rightWheelOutput);
+//    leftSpeed = 150 + leftWheelOutput;
+//    rightSpeed = 150 + rightWheelOutput;
+//    leftSpeed = ((float)targetDist / (float)sensDriverFront) * baseSpeed;
+//    rightSpeed = ((float)targetDist / (float)sensPassFront) * baseSpeed;
   }
   else if ((sensDriverBack < 300) && (sensPassBack < 300)) {
     int totalSpace = sensDriverBack + sensPassBack;
     targetDist = (float)totalSpace/2;
     xbeeComm.println((String)"Using both back sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
+//    leftWheelInput = (float)sensDriverBack;
+//    rightWheelInput = (float)sensPassBack;
+//    leftWheelPID.Compute();
+//    rightWheelPID.Compute();
+//    xbeeComm.println((String)"PID input | Left: " + leftWheelInput + " | Right: " + rightWheelInput);
+//    xbeeComm.println((String)"PID output | Left: " + leftWheelOutput + " | Right: " + rightWheelOutput);
+//    leftSpeed = leftWheelOutput;
+//    rightSpeed = rightWheelOutput;
     leftSpeed = ((float)targetDist / (float)sensDriverBack) * baseSpeed;
     rightSpeed = ((float)targetDist / (float)sensPassBack) * baseSpeed;
   }
@@ -179,20 +253,19 @@ void loop() {
   }
   
 
-  ;
 
-  if(rightSpeed > 250 || leftSpeed > 250) {
-    float reduc = 0;
-    if (rightSpeed > 250) {
-      reduc = (float)250/(float)rightSpeed;
-    }
-    else {
-      reduc = (float)250/(float)leftSpeed;
-    }
-    xbeeComm.println((String)"Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduc + ")");
-    rightSpeed = reduc * rightSpeed;
-    leftSpeed = reduc * leftSpeed;
-  }
+//  if(rightSpeed > 250 || leftSpeed > 250) {
+//    float reduc = 0;
+//    if (rightSpeed > 250) {
+//      reduc = (float)250/(float)rightSpeed;
+//    }
+//    else {
+//      reduc = (float)250/(float)leftSpeed;
+//    }
+//    xbeeComm.println((String)"Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduc + ")");
+//    rightSpeed = reduc * rightSpeed;
+//    leftSpeed = reduc * leftSpeed;
+//  }
 
   if(forward) {
     xbeeComm.println((String)"LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
@@ -204,8 +277,7 @@ void loop() {
   }
 
  }
-   
-   
+
   if (newByte != -1) {
     switch (newByte) {
       case '\r':
@@ -284,3 +356,4 @@ void loop() {
     }
   }
 }
+

@@ -17,8 +17,8 @@ VL53L0X rightBack;
 DriveMotors myMotors(MOTOR_LEFT_CH0, MOTOR_LEFT_CH1,
                     MOTOR_RIGHT_CH0, MOTOR_RIGHT_CH1);
 Sensors sensors;                    
-int leftSpeed = 150;
-int rightSpeed = 150;
+int leftSpeed = 25;
+int rightSpeed = 25;
 
 boolean run = false;
 boolean dist = false;
@@ -123,7 +123,7 @@ void loop() {
  else if (test) {
   forward = true;
   xbeeComm.println((String)"LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
-  int baseSpeed = 125;
+  int baseSpeed = 75;
   int leftSpeed = 0;
   int rightSpeed = 0;
 
@@ -134,21 +134,27 @@ void loop() {
     leftSpeed = 50;
     rightSpeed = 50;
   }
-  else if (sensDriverFront < 300 && sensPassFront < 300 && sensDriverBack < 300 && sensPassBack < 300) {
-    int totalSpace = sensDriverBack + sensPassBack;
-    targetDist = (float)totalSpace/2;
-    xbeeComm.println((String)"Using all 4 side sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
-    float avgDriver = (sensDriverFront + sensDriverBack) / 2;
-    float avgPass = (sensPassFront + sensPassBack) /2;
-    leftSpeed = ((float)targetDist / (float)avgDriver) * baseSpeed;
-    rightSpeed = ((float)targetDist / (float)avgPass) * baseSpeed;
-  }
+//  else if (sensDriverFront < 300 && sensPassFront < 300 && sensDriverBack < 300 && sensPassBack < 300) {
+//    int totalSpace = sensDriverBack + sensPassBack;
+//    targetDist = (float)totalSpace/2;
+//    xbeeComm.println((String)"Using all 4 side sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
+//    float avgDriver = (sensDriverFront + sensDriverBack) / 2;
+//    float avgPass = (sensPassFront + sensPassBack) /2;
+//    leftSpeed = ((float)targetDist / (float)avgDriver) * baseSpeed;
+//    rightSpeed = ((float)targetDist / (float)avgPass) * baseSpeed;
+//  }
   else if ((sensDriverFront < 300) && (sensPassFront < 300)) {
     int totalSpace = sensDriverFront + sensPassFront;
     targetDist = (float)totalSpace/2; 
     xbeeComm.println((String)"Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
     leftSpeed = ((float)targetDist / (float)sensDriverFront) * baseSpeed;
     rightSpeed = ((float)targetDist / (float)sensPassFront) * baseSpeed;
+    if (leftSpeed < baseSpeed) {
+      leftSpeed = baseSpeed;
+    }
+    if (rightSpeed < baseSpeed) {
+      rightSpeed = baseSpeed;
+    }
   }
   else if ((sensDriverBack < 300) && (sensPassBack < 300)) {
     int totalSpace = sensDriverBack + sensPassBack;
@@ -156,6 +162,12 @@ void loop() {
     xbeeComm.println((String)"Using both back sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
     leftSpeed = ((float)targetDist / (float)sensDriverBack) * baseSpeed;
     rightSpeed = ((float)targetDist / (float)sensPassBack) * baseSpeed;
+    if (leftSpeed < baseSpeed) {
+      leftSpeed = baseSpeed;
+    }
+    if (rightSpeed < baseSpeed) {
+      rightSpeed = baseSpeed;
+    }
   }
   else if (sensDriverFront < 300 || sensDriverBack < 300) {
     xbeeComm.println("No right wall, turning right");

@@ -121,6 +121,8 @@ void courseCorrecting (int driverSide, int passengerSide) {
         rightSpeed = baseSpeed;
     }
 
+    xbeeComm.println((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
+
     myMotors.drive(leftSpeed, rightSpeed);
 }
 

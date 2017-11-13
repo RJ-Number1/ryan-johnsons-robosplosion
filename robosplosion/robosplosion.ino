@@ -158,34 +158,45 @@ void ryansAlgorithm () {
         xbeeComm.println("No right wall, turning right");
         leftSpeed = baseSpeed;
         rightSpeed = 0;
+
+        if (rightSpeed > 250 || leftSpeed > 250) {
+            float reduce = 0;
+            if (rightSpeed > 250) {
+                reduce = (float) 250 / (float) rightSpeed;
+            } else {
+                reduce = (float) 250 / (float) leftSpeed;
+            }
+            xbeeComm.println(
+                    (String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
+            rightSpeed = reduce * rightSpeed;
+            leftSpeed = reduce * leftSpeed;
+        }
+
+        xbeeComm.println((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
+        myMotors.driveForward(leftSpeed, rightSpeed);
     } else if (wallOnRight) { // falling through implies no wall on left
         xbeeComm.println("No left wall, turning left");
         rightSpeed = baseSpeed;
         leftSpeed = 0;
-    } else {
-        xbeeComm.println("Where am I???");
-        myMotors.driveStop();
-    }
 
-    if (rightSpeed > 250 || leftSpeed > 250) {
-        float reduce = 0;
-        if (rightSpeed > 250) {
-            reduce = (float) 250 / (float) rightSpeed;
-        } else {
-            reduce = (float) 250 / (float) leftSpeed;
+        if (rightSpeed > 250 || leftSpeed > 250) {
+            float reduce = 0;
+            if (rightSpeed > 250) {
+                reduce = (float) 250 / (float) rightSpeed;
+            } else {
+                reduce = (float) 250 / (float) leftSpeed;
+            }
+            xbeeComm.println(
+                    (String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
+            rightSpeed = reduce * rightSpeed;
+            leftSpeed = reduce * leftSpeed;
         }
-        xbeeComm.println(
-                (String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
-        rightSpeed = reduce * rightSpeed;
-        leftSpeed = reduce * leftSpeed;
-    }
 
-    if (forward) {
         xbeeComm.println((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
         myMotors.driveForward(leftSpeed, rightSpeed);
     } else {
-        xbeeComm.println((String) "LeftSpeed: " + -leftSpeed + " | RightSpeed: " + -rightSpeed);
-        myMotors.driveForward(leftSpeed, rightSpeed);
+        xbeeComm.println("Where am I???");
+        myMotors.driveStop();
     }
 }
 

@@ -125,7 +125,7 @@ void courseCorrecting (int driverSide, int passengerSide) {
 bool logging = false;
 void log (String output) {
     if (logging) {
-        log(output);
+        xbeeComm.println(output);
     }
 }
 
@@ -228,6 +228,7 @@ void readUserInput() {
                 displayDistances = !displayDistances;
                 break;
             case 'l':
+                xbeeComm.println("Changing logging to " + !logging);
                 logging = !logging;
             default:
                 Serial.print("Unknown command: ");

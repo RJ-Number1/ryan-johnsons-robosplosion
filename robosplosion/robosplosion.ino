@@ -143,16 +143,19 @@ void ryansAlgorithm () {
     int leftSpeed = 0;
     int rightSpeed = 0;
 
-    bool tooCloseToTheFront = sensFrontLeft < 50 || sensFrontRight < 50;
+    bool tooCloseToTheFront = sensFrontLeft < 75 || sensFrontRight < 75;
     bool wallsOnRightAndLeftFront = (sensDriverFront < 300) && (sensPassFront < 300);
     bool wallsOnRightAndLeftBack = (sensDriverBack < 300) && (sensPassBack < 300);
     bool wallOnLeft = sensDriverFront < 300 || sensDriverBack < 300;
     bool wallOnRight = sensPassFront < 300 || sensPassBack < 300;
 
-    if (tooCloseToTheFront) {
+    if (tooCloseToTheFront ) {
+        // panic, back up, then resume...
         myMotors.driveStop();
         log((String) "Too close to the front (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
-        driveBackwards(50);
+        for (int i = 0; i < 30; i++) {
+            driveBackwards(50);
+        }
     }
 
     else if (wallsOnRightAndLeftFront) {

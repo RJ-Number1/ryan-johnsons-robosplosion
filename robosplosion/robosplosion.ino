@@ -102,6 +102,28 @@ void driveBackwards (int speed) {
     myMotors.drive(-speed, -speed);
 }
 
+void courseCorrecting (int driverSide, int passengerSide) {
+    int totalSpace = driverSide + passengerSide;
+    int baseSpeed = 75;
+    int leftSpeed = 0;
+    int rightSpeed = 0;
+
+    targetDist = (float) totalSpace / 2;
+    xbeeComm.println(
+            (String) "Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist +
+            ")");
+    leftSpeed = ((float) targetDist / (float) sensDriverFront) * baseSpeed;
+    rightSpeed = ((float) targetDist / (float) sensPassFront) * baseSpeed;
+    if (leftSpeed < baseSpeed) {
+        leftSpeed = baseSpeed;
+    }
+    if (rightSpeed < baseSpeed) {
+        rightSpeed = baseSpeed;
+    }
+
+    myMotors.drive(leftSpeed, rightSpeed);
+}
+
 void ryansAlgorithm () {
     int sensDriverFront = leftFront.readRangeSingleMillimeters();
     int sensDriverBack = leftBack.readRangeSingleMillimeters();
@@ -127,36 +149,12 @@ void ryansAlgorithm () {
     if (tooCloseToTheFront) {
         xbeeComm.println((String) "Too close to the front (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
         driveBackwards(50);
-    } else if (wallsOnRightAndLeftFront) {
-        // this looks like an attempt to course correct.
-        int totalSpace = sensDriverFront + sensPassFront;
-        targetDist = (float) totalSpace / 2;
-        xbeeComm.println(
-                (String) "Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist +
-                ")");
-        leftSpeed = ((float) targetDist / (float) sensDriverFront) * baseSpeed;
-        rightSpeed = ((float) targetDist / (float) sensPassFront) * baseSpeed;
-        if (leftSpeed < baseSpeed) {
-            leftSpeed = baseSpeed;
-        }
-        if (rightSpeed < baseSpeed) {
-            rightSpeed = baseSpeed;
-        }
+    }
+    else if (wallsOnRightAndLeftFront) {
+        courseCorrecting(sensDriverFront, sensPassFront);
     } else if (wallsOnRightAndLeftBack) {
-        int totalSpace = sensDriverBack + sensPassBack;
-        targetDist = (float) totalSpace / 2;
-        xbeeComm.println(
-                (String) "Using both back sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
-        leftSpeed = ((float) targetDist / (float) sensDriverBack) * baseSpeed;
-        rightSpeed = ((float) targetDist / (float) sensPassBack) * baseSpeed;
-        if (leftSpeed < baseSpeed) {
-            leftSpeed = baseSpeed;
-        }
-        if (rightSpeed < baseSpeed) {
-            rightSpeed = baseSpeed;
-        }
-    } else if (wallOnLeft) { // implies no wall on right
-        // falls through to this, so we know there is no right wall.
+        courseCorrecting(sensDriverBack, sensPassBack);
+    } else if (wallOnLeft) {
         xbeeComm.println("No right wall, turning right");
         leftSpeed = baseSpeed;
         rightSpeed = 0;

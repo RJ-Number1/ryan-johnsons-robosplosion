@@ -112,8 +112,8 @@ void courseCorrecting (int driverSide, int passengerSide) {
     xbeeComm.println(
             (String) "Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist +
             ")");
-    leftSpeed = ((float) targetDist / (float) sensDriverFront) * baseSpeed;
-    rightSpeed = ((float) targetDist / (float) sensPassFront) * baseSpeed;
+    leftSpeed = ((float) targetDist / (float) driverSide) * baseSpeed;
+    rightSpeed = ((float) targetDist / (float) passengerSide) * baseSpeed;
     if (leftSpeed < baseSpeed) {
         leftSpeed = baseSpeed;
     }

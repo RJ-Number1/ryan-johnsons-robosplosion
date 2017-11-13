@@ -98,7 +98,7 @@ void driveBackwards (int speed) {
         speed = reduce * speed;
     }
 
-    xbeeComm.println((String) "LeftSpeed: " + speed + " | RightSpeed: " + speed);
+    xbeeComm.println((String) "LeftSpeed: " + -speed + " | RightSpeed: " + -speed);
     myMotors.drive(-speed, -speed);
 }
 
@@ -119,15 +119,16 @@ void ryansAlgorithm () {
     int rightSpeed = 0;
 
     bool tooCloseToTheFront = sensFrontLeft < 50 || sensFrontRight < 50;
-    bool tooCloseToFrontSides = (sensDriverFront < 300) && (sensPassFront < 300);
-    bool tooCloseToBackSides = (sensDriverBack < 300) && (sensPassBack < 300);
+    bool wallsOnRightAndLeftFront = (sensDriverFront < 300) && (sensPassFront < 300);
+    bool wallsOnRightAndLeftBack = (sensDriverBack < 300) && (sensPassBack < 300);
     bool wallOnLeft = sensDriverFront < 300 || sensDriverBack < 300;
     bool wallOnRight = sensPassFront < 300 || sensPassBack < 300;
 
     if (tooCloseToTheFront) {
         xbeeComm.println((String) "Too close to the front (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
         driveBackwards(50);
-    } else if (tooCloseToFrontSides) {
+    } else if (wallsOnRightAndLeftFront) {
+        // this looks like an attempt to course correct.
         int totalSpace = sensDriverFront + sensPassFront;
         targetDist = (float) totalSpace / 2;
         xbeeComm.println(
@@ -141,7 +142,7 @@ void ryansAlgorithm () {
         if (rightSpeed < baseSpeed) {
             rightSpeed = baseSpeed;
         }
-    } else if (tooCloseToBackSides) {
+    } else if (wallsOnRightAndLeftBack) {
         int totalSpace = sensDriverBack + sensPassBack;
         targetDist = (float) totalSpace / 2;
         xbeeComm.println(
@@ -154,12 +155,12 @@ void ryansAlgorithm () {
         if (rightSpeed < baseSpeed) {
             rightSpeed = baseSpeed;
         }
-    } else if (wallOnLeft) {
+    } else if (wallOnLeft) { // implies no wall on right
         // falls through to this, so we know there is no right wall.
         xbeeComm.println("No right wall, turning right");
         leftSpeed = baseSpeed;
         rightSpeed = 0;
-    } else if (wallOnRight) {
+    } else if (wallOnRight) { // falling through implies no wall on left
         xbeeComm.println("No left wall, turning left");
         rightSpeed = baseSpeed;
         leftSpeed = 0;

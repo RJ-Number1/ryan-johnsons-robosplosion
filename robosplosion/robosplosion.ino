@@ -75,39 +75,6 @@ void setup() {
     rightBack.startContinuous();
 }
 
-
-void javiersAlgorithm () {
-    // todo: read these at run time, don't save in memory.
-    int sensDriverFront = leftFront.readRangeSingleMillimeters();
-    int sensDriverBack = leftBack.readRangeSingleMillimeters();
-    int sensPassFront = rightFront.readRangeSingleMillimeters();
-    int sensPassBack = rightBack.readRangeSingleMillimeters();
-    int sensFrontLeft = frontLeft.readRangeSingleMillimeters();
-    int sensFrontRight = frontRight.readRangeSingleMillimeters();
-
-    int newLeftSpeed;
-    int newRightSpeed;
-
-    if (sensPassFront < 175) {
-        newRightSpeed = 225;
-    } else {
-        newRightSpeed = 100;
-    }
-
-    if (sensDriverFront < 175) {
-        newLeftSpeed = 225;
-    } else {
-        newLeftSpeed = 100;
-    }
-
-    xbeeComm.println(
-            (String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " +
-            sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
-    xbeeComm.println((String) "LS " + newLeftSpeed);
-    xbeeComm.println((String) "RS " + newRightSpeed);
-    myMotors.driveForward(300, 0);
-}
-
 void printDistance () {
     // todo: read these at run time, don't save in memory.
     int sensDriverFront = leftFront.readRangeSingleMillimeters();
@@ -250,7 +217,6 @@ void loop() {
     } else if (stopped) {
         myMotors.driveStop();
     } else if (!stopped) {
-//        javiersAlgorithm();
         ryansAlgorithm();
     }
 }

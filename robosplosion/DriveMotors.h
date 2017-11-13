@@ -19,6 +19,7 @@ class DriveMotors {
     
   public:
     DriveMotors(const byte lm0, const byte lm1, const byte rm0, const byte rm1);
+    void drive(const int speedLeft, const int speedRight);
     void driveForward(const byte speedLeft, const byte speedRight);
     void determineSpeed(const byte speed);
     void driveReverse(const byte speedLeft, const byte speedRight);

@@ -25,6 +25,30 @@ DriveMotors::DriveMotors(const byte lm0, const byte lm1, const byte rm0, const b
   }
 }
 
+void DriveMotors::drive(const int speedLeft, const int speedRight) {
+  if(speedLeft >= 0) {
+//    Serial.println("Left forward");
+    analogWrite(leftMotorCh0Pin, 0);
+    analogWrite(leftMotorCh1Pin, speedLeft);
+  }
+  else {
+//    Serial.println("Left reverse");
+    analogWrite(leftMotorCh0Pin, speedLeft);
+    analogWrite(leftMotorCh1Pin, 0);
+  }
+
+  if(speedRight >= 0) {
+//    Serial.println("Right forward");
+    analogWrite(rightMotorCh0Pin, 0);
+    analogWrite(rightMotorCh1Pin, speedRight);
+  }
+  else {
+//    Serial.println("Right reverse");
+    analogWrite(rightMotorCh0Pin, speedRight);
+    analogWrite(rightMotorCh1Pin, 0);
+  }
+}
+
 void DriveMotors::driveForward(const byte speedLeft, const byte speedRight) {
 
   analogWrite(leftMotorCh0Pin, 0);

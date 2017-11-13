@@ -84,6 +84,7 @@ void javiersAlgorithm () {
     int sensPassBack = rightBack.readRangeSingleMillimeters();
     int sensFrontLeft = frontLeft.readRangeSingleMillimeters();
     int sensFrontRight = frontRight.readRangeSingleMillimeters();
+
     int newLeftSpeed;
     int newRightSpeed;
 
@@ -98,17 +99,6 @@ void javiersAlgorithm () {
     } else {
         newLeftSpeed = 100;
     }
-
-    boolean followWall = "right";
-
-    int maxWallDist = 170;
-
-    if (sensPassFront < maxWallDist) {
-        followWall = "right";
-    } else if (sensDriverFront < maxWallDist) {
-        followWall = "left";
-    }
-
 
     xbeeComm.println(
             (String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " +
@@ -225,7 +215,7 @@ void ryansAlgorithm () {
 bool displayDistances = false;
 bool stopped = true;
 void readUserInput() {
-    byte newByte = xbeeComm.read();
+    int newByte = xbeeComm.read();
     if (newByte != -1) {
         switch (newByte) {
             case '\r':

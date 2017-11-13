@@ -84,21 +84,19 @@ void printDistance () {
     int sensFrontLeft = frontLeft.readRangeSingleMillimeters();
     int sensFrontRight = frontRight.readRangeSingleMillimeters();
 
-    xbeeComm.println(
-            (String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " +
-            sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
+    log((String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
 }
 
 void driveBackwards (int speed) {
     if (speed > 250) {
         float reduce = 0;
         reduce = (float) 250 / (float) speed;
-        xbeeComm.println(
+        log(
                 (String) "Reducing speed " + speed + " | Reduction " + reduce + ")");
         speed = reduce * speed;
     }
 
-    xbeeComm.println((String) "LeftSpeed: " + -speed + " | RightSpeed: " + -speed);
+    log((String) "LeftSpeed: " + -speed + " | RightSpeed: " + -speed);
     myMotors.drive(-speed, -speed);
 }
 
@@ -109,9 +107,7 @@ void courseCorrecting (int driverSide, int passengerSide) {
     int rightSpeed = 0;
 
     targetDist = (float) totalSpace / 2;
-    xbeeComm.println(
-            (String) "Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist +
-            ")");
+    log((String) "Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
     leftSpeed = ((float) targetDist / (float) driverSide) * baseSpeed;
     rightSpeed = ((float) targetDist / (float) passengerSide) * baseSpeed;
     if (leftSpeed < baseSpeed) {
@@ -121,9 +117,16 @@ void courseCorrecting (int driverSide, int passengerSide) {
         rightSpeed = baseSpeed;
     }
 
-    xbeeComm.println((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
+    log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
 
     myMotors.drive(leftSpeed, rightSpeed);
+}
+
+bool logging = false;
+void log (String output) {
+    if (logging) {
+        log(output);
+    }
 }
 
 void ryansAlgorithm () {
@@ -135,9 +138,7 @@ void ryansAlgorithm () {
     int sensFrontRight = frontRight.readRangeSingleMillimeters();
 
     forward = true;
-    xbeeComm.println(
-            (String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " +
-            sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
+    log((String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
     int baseSpeed = 75;
     int leftSpeed = 0;
     int rightSpeed = 0;
@@ -149,15 +150,17 @@ void ryansAlgorithm () {
     bool wallOnRight = sensPassFront < 300 || sensPassBack < 300;
 
     if (tooCloseToTheFront) {
-        xbeeComm.println((String) "Too close to the front (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
+        myMotors.driveStop();
+        log((String) "Too close to the front (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
         driveBackwards(50);
     }
+
     else if (wallsOnRightAndLeftFront) {
         courseCorrecting(sensDriverFront, sensPassFront);
     } else if (wallsOnRightAndLeftBack) {
         courseCorrecting(sensDriverBack, sensPassBack);
     } else if (wallOnLeft) {
-        xbeeComm.println("No right wall, turning right");
+        log("No right wall, turning right");
         leftSpeed = baseSpeed;
         rightSpeed = 0;
 
@@ -168,16 +171,15 @@ void ryansAlgorithm () {
             } else {
                 reduce = (float) 250 / (float) leftSpeed;
             }
-            xbeeComm.println(
-                    (String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
+            log((String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
             rightSpeed = reduce * rightSpeed;
             leftSpeed = reduce * leftSpeed;
         }
 
-        xbeeComm.println((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
+        log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
         myMotors.driveForward(leftSpeed, rightSpeed);
     } else if (wallOnRight) { // falling through implies no wall on left
-        xbeeComm.println("No left wall, turning left");
+        log("No left wall, turning left");
         rightSpeed = baseSpeed;
         leftSpeed = 0;
 
@@ -188,16 +190,16 @@ void ryansAlgorithm () {
             } else {
                 reduce = (float) 250 / (float) leftSpeed;
             }
-            xbeeComm.println(
+            log(
                     (String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
             rightSpeed = reduce * rightSpeed;
             leftSpeed = reduce * leftSpeed;
         }
 
-        xbeeComm.println((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
+        log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
         myMotors.driveForward(leftSpeed, rightSpeed);
     } else {
-        xbeeComm.println("Where am I???");
+        log("Where am I???");
         myMotors.driveStop();
     }
 }
@@ -218,13 +220,15 @@ void readUserInput() {
                 stopped = true;
                 break;
             case 'w':
-                xbeeComm.println("Drive forward");
+                log("Drive forward");
                 stopped = false;
                 break;
             case ' ':
-                xbeeComm.println("Flip distance display.");
+                log("Flip distance display.");
                 displayDistances = !displayDistances;
                 break;
+            case 'l':
+                logging = !logging;
             default:
                 Serial.print("Unknown command: ");
                 Serial.println(newByte);

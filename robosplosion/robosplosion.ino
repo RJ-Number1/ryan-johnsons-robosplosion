@@ -20,6 +20,7 @@ DriveMotors myMotors(MOTOR_LEFT_CH0, MOTOR_LEFT_CH1,
 Sensors sensors;
 int leftSpeed = 25;
 int rightSpeed = 25;
+int sensDriverFront, sensDriverBack, sensPassFront, sensPassBack, sensFrontLeft, sensFrontRight;
 
 bool forward = true;
 double targetDist;
@@ -88,16 +89,13 @@ void printDistance () {
 }
 
 void driveBackwards (int speed) {
-    if (speed > 250) {
-        float reduce = 0;
-        reduce = (float) 250 / (float) speed;
-        log(
-                (String) "Reducing speed " + speed + " | Reduction " + reduce + ")");
-        speed = reduce * speed;
-    }
-
     log((String) "LeftSpeed: " + -speed + " | RightSpeed: " + -speed);
     myMotors.drive(-speed, -speed);
+}
+
+void stopDriving() {
+    myMotors.driveStop();
+    //delay(100);
 }
 
 void courseCorrecting (int driverSide, int passengerSide) {
@@ -107,7 +105,6 @@ void courseCorrecting (int driverSide, int passengerSide) {
     int rightSpeed = 0;
 
     targetDist = (float) totalSpace / 2;
-    log((String) "Using both front sensors (TotalSpace " + totalSpace + " | TargetDist " + targetDist + ")");
     leftSpeed = ((float) targetDist / (float) driverSide) * baseSpeed;
     rightSpeed = ((float) targetDist / (float) passengerSide) * baseSpeed;
     if (leftSpeed < baseSpeed) {
@@ -122,6 +119,11 @@ void courseCorrecting (int driverSide, int passengerSide) {
     myMotors.drive(leftSpeed, rightSpeed);
 }
 
+void pivotRobot (int speed) {
+    log((String) "LeftSpeed: " + speed / 2 + " | RightSpeed: " + -speed);
+    myMotors.drive(speed / 2, -speed);
+}
+
 bool logging = false;
 void log (String output) {
     if (logging) {
@@ -129,82 +131,13 @@ void log (String output) {
     }
 }
 
-void ryansAlgorithm () {
-    int sensDriverFront = leftFront.readRangeSingleMillimeters();
-    int sensDriverBack = leftBack.readRangeSingleMillimeters();
-    int sensPassFront = rightFront.readRangeSingleMillimeters();
-    int sensPassBack = rightBack.readRangeSingleMillimeters();
-    int sensFrontLeft = frontLeft.readRangeSingleMillimeters();
-    int sensFrontRight = frontRight.readRangeSingleMillimeters();
-
-    forward = true;
-    log((String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
-    int baseSpeed = 75;
-    int leftSpeed = 0;
-    int rightSpeed = 0;
-
-    bool tooCloseToTheFront = sensFrontLeft < 75 || sensFrontRight < 75;
-    bool wallsOnRightAndLeftFront = (sensDriverFront < 300) && (sensPassFront < 300);
-    bool wallsOnRightAndLeftBack = (sensDriverBack < 300) && (sensPassBack < 300);
-    bool wallOnLeft = sensDriverFront < 300 || sensDriverBack < 300;
-    bool wallOnRight = sensPassFront < 300 || sensPassBack < 300;
-
-    if (tooCloseToTheFront ) {
-        // panic, back up, then resume...
-        myMotors.driveStop();
-        log((String) "Too close to the front (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
-        for (int i = 0; i < 30; i++) {
-            driveBackwards(50);
-        }
-    }
-
-    else if (wallsOnRightAndLeftFront) {
-        courseCorrecting(sensDriverFront, sensPassFront);
-    } else if (wallsOnRightAndLeftBack) {
-        courseCorrecting(sensDriverBack, sensPassBack);
-    } else if (wallOnLeft) {
-        log("No right wall, turning right");
-        leftSpeed = baseSpeed;
-        rightSpeed = 0;
-
-        if (rightSpeed > 250 || leftSpeed > 250) {
-            float reduce = 0;
-            if (rightSpeed > 250) {
-                reduce = (float) 250 / (float) rightSpeed;
-            } else {
-                reduce = (float) 250 / (float) leftSpeed;
-            }
-            log((String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
-            rightSpeed = reduce * rightSpeed;
-            leftSpeed = reduce * leftSpeed;
-        }
-
-        log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
-        myMotors.driveForward(leftSpeed, rightSpeed);
-    } else if (wallOnRight) { // falling through implies no wall on left
-        log("No left wall, turning left");
-        rightSpeed = baseSpeed;
-        leftSpeed = 0;
-
-        if (rightSpeed > 250 || leftSpeed > 250) {
-            float reduce = 0;
-            if (rightSpeed > 250) {
-                reduce = (float) 250 / (float) rightSpeed;
-            } else {
-                reduce = (float) 250 / (float) leftSpeed;
-            }
-            log(
-                    (String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
-            rightSpeed = reduce * rightSpeed;
-            leftSpeed = reduce * leftSpeed;
-        }
-
-        log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
-        myMotors.driveForward(leftSpeed, rightSpeed);
-    } else {
-        log("Where am I???");
-        myMotors.driveStop();
-    }
+void readSensorData() {
+    sensDriverFront = leftFront.readRangeSingleMillimeters();
+    sensDriverBack = leftBack.readRangeSingleMillimeters();
+    sensPassFront = rightFront.readRangeSingleMillimeters();
+    sensPassBack = rightBack.readRangeSingleMillimeters();
+    sensFrontLeft = frontLeft.readRangeSingleMillimeters();
+    sensFrontRight = frontRight.readRangeSingleMillimeters();
 }
 
 bool displayDistances = false;
@@ -237,6 +170,100 @@ void readUserInput() {
                 Serial.print("Unknown command: ");
                 Serial.println(newByte);
         }
+    }
+}
+
+void ryansAlgorithm () {
+    readSensorData();
+
+    forward = true;
+    log((String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
+    int baseSpeed = 75;
+    int leftSpeed = 0;
+    int rightSpeed = 0;
+
+    bool emergencyBackup = sensFrontLeft < 75 || sensFrontRight < 75;
+    bool wallInFront = sensFrontLeft < 200 && sensFrontRight < 200;
+    bool wallsOnRightAndLeftFront = (sensDriverFront < 300) && (sensPassFront < 300);
+    bool wallsOnRightAndLeftBack = (sensDriverBack < 300) && (sensPassBack < 300);
+    bool wallOnLeft = sensDriverFront < 300 || sensDriverBack < 300;
+    bool wallOnRight = sensPassFront < 300 || sensPassBack < 300;
+
+    if (emergencyBackup) {
+        // panic, back up, then resume...
+        stopDriving();
+        log((String) "LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront);
+        driveBackwards(50);
+    }
+    else if (wallInFront && wallsOnRightAndLeftFront) {
+        // This is when we need to pivot out of the dead end
+        while(wallInFront && !stopped) {
+            //stopDriving();
+            readUserInput();
+            readSensorData();
+            emergencyBackup = sensFrontLeft < 50 || sensFrontRight < 50;
+            wallInFront = sensFrontLeft < 300 && sensFrontRight < 300;
+            if (emergencyBackup) {
+                log((String) "LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront);
+                driveBackwards(50);
+            }
+            else if (sensFrontLeft > 100 && sensFrontRight > 100) {
+                courseCorrecting(75, 50);
+            }
+            else {
+                log((String) "Pivoting (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
+                pivotRobot(50);
+            }
+        }
+    }
+    else if (wallsOnRightAndLeftFront) {
+        log((String) "Using both front sensors");
+        courseCorrecting(sensDriverFront, sensPassFront);
+    } else if (wallsOnRightAndLeftBack) {
+        log((String) "Using both rear sensors");
+        courseCorrecting(sensDriverBack, sensPassBack);
+    } else if (wallOnLeft) {
+        log("No right wall, turning right");
+        leftSpeed = baseSpeed;
+        rightSpeed = 0;
+
+        if (rightSpeed > 250 || leftSpeed > 250) {
+            float reduce = 0;
+            if (rightSpeed > 250) {
+                reduce = (float) 250 / (float) rightSpeed;
+            } else {
+                reduce = (float) 250 / (float) leftSpeed;
+            }
+            log((String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
+            rightSpeed = reduce * rightSpeed;
+            leftSpeed = reduce * leftSpeed;
+        }
+
+        log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
+        myMotors.drive(leftSpeed, rightSpeed);
+    } else if (wallOnRight) { // falling through implies no wall on left
+        log("No left wall, turning left");
+        rightSpeed = baseSpeed;
+        leftSpeed = 0;
+
+        if (rightSpeed > 250 || leftSpeed > 250) {
+            float reduce = 0;
+            if (rightSpeed > 250) {
+                reduce = (float) 250 / (float) rightSpeed;
+            } else {
+                reduce = (float) 250 / (float) leftSpeed;
+            }
+            log(
+                    (String) "Reducing speed (RS " + rightSpeed + " | LS " + leftSpeed + " | Reduction " + reduce + ")");
+            rightSpeed = reduce * rightSpeed;
+            leftSpeed = reduce * leftSpeed;
+        }
+
+        log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
+        myMotors.drive(leftSpeed, rightSpeed);
+    } else {
+        log("Where am I???");
+        myMotors.driveStop();
     }
 }
 

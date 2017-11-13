@@ -32,7 +32,7 @@ void DriveMotors::drive(const int speedLeft, const int speedRight) {
     analogWrite(leftMotorCh1Pin, speedLeft);
   }
   else {
-    analogWrite(leftMotorCh0Pin, speedLeft);
+    analogWrite(leftMotorCh0Pin, -speedLeft);
     analogWrite(leftMotorCh1Pin, 0);
   }
 
@@ -41,7 +41,7 @@ void DriveMotors::drive(const int speedLeft, const int speedRight) {
     analogWrite(rightMotorCh1Pin, speedRight);
   }
   else {
-    analogWrite(rightMotorCh0Pin, speedRight);
+    analogWrite(rightMotorCh0Pin, -speedRight);
     analogWrite(rightMotorCh1Pin, 0);
   }
 }

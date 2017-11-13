@@ -33,7 +33,7 @@ void DriveMotors::drive(const int speedLeft, const int speedRight) {
   }
   else {
 //    Serial.println("Left reverse");
-    analogWrite(leftMotorCh0Pin, speedLeft);
+    analogWrite(leftMotorCh0Pin, abs(speedLeft));
     analogWrite(leftMotorCh1Pin, 0);
   }
 
@@ -44,7 +44,7 @@ void DriveMotors::drive(const int speedLeft, const int speedRight) {
   }
   else {
 //    Serial.println("Right reverse");
-    analogWrite(rightMotorCh0Pin, speedRight);
+    analogWrite(rightMotorCh0Pin, abs(speedRight));
     analogWrite(rightMotorCh1Pin, 0);
   }
 }

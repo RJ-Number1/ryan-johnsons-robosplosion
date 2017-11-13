@@ -28,7 +28,7 @@ double targetDist;
 
 //PID variables
 double leftWheelInput, rightWheelInput, leftWheelOutput, rightWheelOutput, leftDist, rightDist;
-float Kp=1;
+float Kp=5;
 float Ki=0;
 float Kd=0;
 PID leftWheelPID(&leftWheelInput, &leftWheelOutput, &leftDist, Kp, Ki, Kd, DIRECT);  
@@ -81,10 +81,10 @@ void setup() {
 
   leftWheelPID.SetMode(AUTOMATIC);
   leftWheelPID.SetSampleTime(1);
-  leftWheelPID.SetOutputLimits (0,255);
+  leftWheelPID.SetOutputLimits (-50,50);
   rightWheelPID.SetMode(AUTOMATIC);
   rightWheelPID.SetSampleTime(1);  
-  rightWheelPID.SetOutputLimits (0,255);
+  rightWheelPID.SetOutputLimits (-50,50);
   
   lastMessage = millis(); 
 }
@@ -165,8 +165,8 @@ void loop() {
       rightWheelPID.Compute();
       xbeeComm.println((String)"PID input | Left: " + leftWheelInput + " | Right: " + rightWheelInput);
       xbeeComm.println((String)"PID output | Left: " + leftWheelOutput + " | Right: " + rightWheelOutput);
-      leftSpeed = leftWheelOutput;
-      rightSpeed = rightWheelOutput;
+      leftSpeed = 100+leftWheelOutput;
+      rightSpeed = 100+rightWheelOutput;
     }
     else if (sensDriverFront < 300 && sensPassFront < 300) {
       int totalSpace = sensDriverFront + sensPassFront;
@@ -180,8 +180,8 @@ void loop() {
       rightWheelPID.Compute();
       xbeeComm.println((String)"PID input | Left: " + leftWheelInput + " | Right: " + rightWheelInput);
       xbeeComm.println((String)"PID output | Left: " + leftWheelOutput + " | Right: " + rightWheelOutput);
-      leftSpeed = leftWheelOutput;
-      rightSpeed = rightWheelOutput;
+      leftSpeed = 100+leftWheelOutput;
+      rightSpeed = 100+rightWheelOutput;
     }
     else if (sensDriverBack < 300 && sensPassBack < 300) {
       int totalSpace = sensDriverBack + sensPassBack;
@@ -195,8 +195,8 @@ void loop() {
       rightWheelPID.Compute();
       xbeeComm.println((String)"PID input | Left: " + leftWheelInput + " | Right: " + rightWheelInput);
       xbeeComm.println((String)"PID output | Left: " + leftWheelOutput + " | Right: " + rightWheelOutput);
-      leftSpeed = leftWheelOutput;
-      rightSpeed = rightWheelOutput;
+      leftSpeed = 100+leftWheelOutput;
+      rightSpeed = 100+rightWheelOutput;
     }
     else if (((sensFrontLeft + sensFrontRight) / 2) > 150) {
       xbeeComm.println("There are no walls");

@@ -180,7 +180,7 @@ void printMeasurements () {
     Serial.print(" TIMEOUT ");
   }
 
-  log();
+  log("");
   delay(100);
 }
 

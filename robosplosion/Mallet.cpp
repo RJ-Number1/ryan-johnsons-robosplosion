@@ -1,6 +1,6 @@
 #include "mallet.h"
 
-/*Mallet::Mallet(Servo * s) {
+Mallet::Mallet(Servo * s) {
   malletServo = s;
   malletServo->attach(MALLET_PIN);
   malletServo->write(MALLET_RETRACT_POS);
@@ -15,5 +15,5 @@ void Mallet::swing(void) {
 void Mallet::retract(void) {
   malletServo->write(MALLET_RETRACT_POS);
   delay(MALLET_RETRACT_DURATION);
-}*/
+}
 

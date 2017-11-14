@@ -1,9 +1,9 @@
 #ifndef _MALLET_H_
 #define _MALLET_H_
 
-//#include "Arduino.h"
-//#include "Pins.h"
-//#include <Servo.h>
+#include "Arduino.h"
+#include "Pins.h"
+#include <Servo.h>
 
 
 #define MALLET_EXTEND_POS         80
@@ -16,7 +16,7 @@
 #define MALLET_SNAP_DURATION      200
 #define MALLET_RETRACT_DURATION   1000
 
-/*class Mallet {
+class Mallet {
   private:
     Servo * malletServo;
     
@@ -24,7 +24,7 @@
     Mallet(Servo * s);
     void swing();
     void retract();
-};*/
+};
 
 #endif
 

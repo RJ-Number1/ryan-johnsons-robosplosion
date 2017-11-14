@@ -15,6 +15,12 @@ VL53L0X rightFront;
 VL53L0X rightBack;
 DriveMotors myMotors(MOTOR_LEFT_CH0, MOTOR_LEFT_CH1,
                     MOTOR_RIGHT_CH0, MOTOR_RIGHT_CH1);
+                    
+HCSR04 topSensor(SENSOR_TOP_TRIG, SENSOR_TOP_ECHO);
+Servo malletServo;
+
+Mallet mallet(&malletServo);
+
 Sensors sensors;                    
 int leftSpeed = 130;
 int rightSpeed = 150;
@@ -107,7 +113,8 @@ void driveForward(){
 
   bool blockedFront = false;
   bool blockedRight = true;
-  while (!blockedFront && blockedRight) {
+  bool mazeExit = false;
+  while (!blockedFront && blockedRight && !mazeExit) {
     if (rightFront.readRangeContinuousMillimeters() < 100){
       newRightSpeed = 185;
     } else {
@@ -122,16 +129,27 @@ void driveForward(){
  //front left sensor is not working
     blockedFront = ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100));
     blockedRight = ((rightBack.readRangeContinuousMillimeters() < 200));
+    topSensor.update();
+    if(topSensor.getDistanceInCm() > 2 && topSensor.getDistanceInCm() < 25) {
+      mazeExit = true;
+    }
   }
   myMotors.driveStop();
   // todo: figure these out at run time.
   delay(1000);
 
-  if ( (frontRight.readRangeContinuousMillimeters() < 125) && (frontLeft.readRangeContinuousMillimeters() < 125) && (rightBack.readRangeContinuousMillimeters() < 200) && (leftBack.readRangeContinuousMillimeters() < 200) ) {
+  if (mazeExit) {
+    while (frontRight.readRangeContinuousMillimeters() > 75 && frontLeft.readRangeContinuousMillimeters() > 75) {
+      myMotors.driveForward(50, 60);
+    }
+    mallet.swing();
+    mallet.retract();
+  }
+  else if ( (frontRight.readRangeContinuousMillimeters() < 125) && (frontLeft.readRangeContinuousMillimeters() < 125) && (rightBack.readRangeContinuousMillimeters() < 200) && (leftBack.readRangeContinuousMillimeters() < 200) ) {
     log("Blocked everywhere.");
     turnAround();
   } 
- else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
+  else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
    log("Blocked only in the Front.");
    turnRight();
   } 

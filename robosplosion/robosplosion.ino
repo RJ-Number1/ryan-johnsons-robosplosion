@@ -63,6 +63,13 @@ void setup() {
   rightBack.startContinuous();
 }
 
+bool loggingOn = false;
+void log (String message) {
+  if (loggingOn) {
+    xbeeComm.println(message);
+  }
+}
+
 void turnAround () {
   while (frontRight.readRangeContinuousMillimeters() < 350){
     myMotors.pivotLeft(TURN_SPEED);
@@ -139,13 +146,6 @@ void driveForward(){
   else {
     myMotors.driveStop();
   }
-}
-
-bool loggingOn = false;
-void log (String message) {
-    if (loggingOn) {
-        xbeeComm.println(message);
-    }
 }
 
 void printMeasurements () {

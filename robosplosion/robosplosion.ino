@@ -20,7 +20,7 @@ int leftSpeed = 150;
 int rightSpeed = 150;
 
 boolean run = false;
-byte newByte;
+int newByte;
 void setup() {
   Serial.begin(9600);
   xbeeComm.begin(9600);
@@ -62,37 +62,64 @@ void setup() {
   rightFront.startContinuous();
   rightBack.startContinuous();
 }
-void loop() {
-  newByte = xbeeComm.read();
-  int frontRightSensorReading = rightFront.readRangeSingleMillimeters();
-  int frontLeftSensorReading = leftFront.readRangeSingleMillimeters();
+
+void turnAround () {
+  return;
+}
+
+void turnRight () {
+  return;
+}
+
+void turnLeft () {
   
+}
+
+void driveForward(){
   int newLeftSpeed;
   int newRightSpeed;
-  if (frontRightSensorReading < 175){
-    newRightSpeed = 225;
-    }
-     else {
-       newRightSpeed = 100;
-    }
-    if (frontLeftSensorReading < 175){
-    newLeftSpeed = 225;
-    }
-     else {
-       newLeftSpeed = 100;
-    }
-  
-   if(run){
-    
-     xbeeComm.println((String)"LeftSpeed " + newLeftSpeed);
-     xbeeComm.println((String)"RightSpeed " + newRightSpeed);
-     myMotors.driveForward(newRightSpeed, newLeftSpeed);
-  
+  int rightFrontSensorReading;
+  int leftFrontSensorReading; 
 
-   
-   }
-   
-   
+  // todo: this will not catch right turns that are available when the front is open
+  bool blockedFront = false;
+  while (!blockedFront) {
+    rightFrontSensorReading = rightFront.readRangeSingleMillimeters();
+    leftFrontSensorReading = leftFront.readRangeSingleMillimeters();
+    
+    if (rightFrontSensorReading < 175){
+      newRightSpeed = 225;
+    } else {
+      newRightSpeed = 100;
+    }
+    if (leftFrontSensorReading < 175){
+      newLeftSpeed = 225;
+    } else {
+      newLeftSpeed = 100;
+    }
+    myMotors.driveForward(newRightSpeed, newLeftSpeed);
+
+    blockedFront = (frontRight.readRangeSingleMillimeters() < 200) && (frontLeft.readRangeSingleMillimeters() < 200);
+  }
+
+  // todo: figure these out at run time.
+  bool blockedRight = true;
+  bool blockedLeft = true;
+  if (blockedFront && blockedRight && blockedLeft) {
+    turnAround();
+  } else if (blockedFront && blockedRight && !blockedLeft) {
+    turnLeft();
+  } else if (blockedFront && !blockedRight && blockedLeft) {
+    turnRight();
+  } else if (blockedFront && !blockedRight && !blockedLeft) {
+    turnRight();
+  } else {
+    // bail.
+  }
+}
+
+void loop() {
+  newByte = xbeeComm.read();
   if (newByte != -1) {
     switch (newByte) {
       case '\r':
@@ -108,8 +135,8 @@ void loop() {
 
       case 'w':
         xbeeComm.println("Drive forward");
-        run = true;
-        //myMotors.driveForward(200, 200);
+        driveForward();
+        myMotors.driveStop();
         break;
 
       case 'a':
@@ -143,11 +170,8 @@ void loop() {
         //distances[0] = (byte) pingFront.getDistanceInCm();
         
         xbeeComm.write(distances, sizeof(distances)/sizeof(byte));
-
         break;
-
-     
-
+        
       default:
         Serial.print("Unknown command: ");
         Serial.println(newByte);

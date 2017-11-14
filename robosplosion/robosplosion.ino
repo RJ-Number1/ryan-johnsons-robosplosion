@@ -126,18 +126,15 @@ void driveForward(){
   } 
  else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
    log("Blocked only in the Front.");
-   myMotors.turnRight(TURN_SPEED);
-   //turnRight();
+   turnRight();
   } 
   else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() < 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
     log("Blocked Front and Right.");
-    myMotors.turnLeft(TURN_SPEED);
-    //turnLeft();
+    turnLeft();
   }  
   else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() < 350)) {
     log("Blocked Front and Left.");
-    myMotors.turnRight(TURN_SPEED);
-   // turnRight();
+    turnRight();
    }
   else {
     myMotors.driveStop();

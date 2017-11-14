@@ -77,15 +77,12 @@ void setup() {
 }
 
 void printDistance () {
-    // todo: read these at run time, don't save in memory.
-    int sensDriverFront = leftFront.readRangeSingleMillimeters();
-    int sensDriverBack = leftBack.readRangeSingleMillimeters();
-    int sensPassFront = rightFront.readRangeSingleMillimeters();
-    int sensPassBack = rightBack.readRangeSingleMillimeters();
-    int sensFrontLeft = frontLeft.readRangeSingleMillimeters();
-    int sensFrontRight = frontRight.readRangeSingleMillimeters();
-
-    log((String) "LB " + sensDriverBack + " | LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront + " | RB " + sensPassBack);
+    log((String) "LB " + leftBack.readRangeSingleMillimeters() +
+                " | LF " + leftFront.readRangeSingleMillimeters() +
+                " | FL " + frontLeft.readRangeSingleMillimeters() +
+                " | FR " + frontRight.readRangeSingleMillimeters() +
+                " | RF " + rightFront.readRangeSingleMillimeters() +
+                " | RB " + rightBack.readRangeSingleMillimeters());
 }
 
 void driveBackwards (int speed) {
@@ -98,7 +95,7 @@ void stopDriving() {
     //delay(100);
 }
 
-void courseCorrecting (int driverSide, int passengerSide) {
+void driveStraight(int driverSide, int passengerSide) {
     int totalSpace = driverSide + passengerSide;
     int baseSpeed = 75;
     int leftSpeed = 0;
@@ -173,6 +170,27 @@ void readUserInput() {
     }
 }
 
+void turnAround () {
+    readUserInput();
+    readSensorData();
+
+    while(wallInFront && !stopped) {
+        emergencyBackup = sensFrontLeft < 50 || sensFrontRight < 50;
+        wallInFront = sensFrontLeft < 300 && sensFrontRight < 300;
+        if (emergencyBackup) {
+            log((String) "LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront);
+            driveBackwards(50);
+        }
+        else if (sensFrontLeft > 100 && sensFrontRight > 100) {
+            driveStraight(75, 50);
+        }
+        else {
+            log((String) "Pivoting (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
+            pivotRobot(50);
+        }
+    }
+}
+
 void ryansAlgorithm () {
     readSensorData();
 
@@ -197,31 +215,14 @@ void ryansAlgorithm () {
     }
     else if (wallInFront && wallsOnRightAndLeftFront) {
         // This is when we need to pivot out of the dead end
-        while(wallInFront && !stopped) {
-            //stopDriving();
-            readUserInput();
-            readSensorData();
-            emergencyBackup = sensFrontLeft < 50 || sensFrontRight < 50;
-            wallInFront = sensFrontLeft < 300 && sensFrontRight < 300;
-            if (emergencyBackup) {
-                log((String) "LF " + sensDriverFront + " | FL " + sensFrontLeft + " | FR " + sensFrontRight + " | RF " + sensPassFront);
-                driveBackwards(50);
-            }
-            else if (sensFrontLeft > 100 && sensFrontRight > 100) {
-                courseCorrecting(75, 50);
-            }
-            else {
-                log((String) "Pivoting (FL " + sensFrontLeft + " | FR " + sensFrontRight + ")");
-                pivotRobot(50);
-            }
-        }
+        turnAround();
     }
     else if (wallsOnRightAndLeftFront) {
         log((String) "Using both front sensors");
-        courseCorrecting(sensDriverFront, sensPassFront);
+        driveStraight(sensDriverFront, sensPassFront);
     } else if (wallsOnRightAndLeftBack) {
         log((String) "Using both rear sensors");
-        courseCorrecting(sensDriverBack, sensPassBack);
+        driveStraight(sensDriverBack, sensPassBack);
     } else if (wallOnLeft) {
         log("No right wall, turning right");
         leftSpeed = baseSpeed;

@@ -91,16 +91,30 @@ void DriveMotors::pivotRight(const byte speed) {
 
 void DriveMotors::turnLeft(const byte speed) {
   analogWrite(leftMotorCh0Pin, 0);
+  analogWrite(leftMotorCh1Pin, speed);
+
+  analogWrite(rightMotorCh0Pin, speed);
+  analogWrite(rightMotorCh1Pin, 0);
+   delay(1000);
+  analogWrite(leftMotorCh0Pin, 0);
+  analogWrite(leftMotorCh1Pin, 0);
+  analogWrite(rightMotorCh0Pin, 0);
+  analogWrite(rightMotorCh1Pin, 0);
+  
+}
+
+void DriveMotors::turnAround(const byte speed) {
+  analogWrite(leftMotorCh0Pin, 0);
   analogWrite(leftMotorCh1Pin, 0);
 
   analogWrite(rightMotorCh0Pin, speed);
   analogWrite(rightMotorCh1Pin, 0);
-
-  if (DEBUG) {
-    DEBUG_SERIAL_PORT.print("[*] Turning left (speed: ");
-    DEBUG_SERIAL_PORT.print(speed);
-    DEBUG_SERIAL_PORT.println(")");
-  }
+   delay(1600);
+  analogWrite(leftMotorCh0Pin, 0);
+  analogWrite(leftMotorCh1Pin, 0);
+  analogWrite(rightMotorCh0Pin, 0);
+  analogWrite(rightMotorCh1Pin, 0);
+  
 }
 
 void DriveMotors::turnRight(const byte speed) {
@@ -108,13 +122,13 @@ void DriveMotors::turnRight(const byte speed) {
   analogWrite(leftMotorCh1Pin, 0);
 
   analogWrite(rightMotorCh0Pin, 0);
-  analogWrite(rightMotorCh1Pin, 0);
+  analogWrite(rightMotorCh1Pin, speed);
 
-  if (DEBUG) {
-    DEBUG_SERIAL_PORT.print("[*] Turning right (speed: ");
-    DEBUG_SERIAL_PORT.print(speed);
-    DEBUG_SERIAL_PORT.println(")");
-  }
+  delay(800);
+  analogWrite(leftMotorCh0Pin, 0);
+  analogWrite(leftMotorCh1Pin, 0);
+  analogWrite(rightMotorCh0Pin, 0);
+  analogWrite(rightMotorCh1Pin, 0);
 }
 
 

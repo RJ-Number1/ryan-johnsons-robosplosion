@@ -16,7 +16,7 @@ VL53L0X rightBack;
 DriveMotors myMotors(MOTOR_LEFT_CH0, MOTOR_LEFT_CH1,
                     MOTOR_RIGHT_CH0, MOTOR_RIGHT_CH1);
 Sensors sensors;                    
-int leftSpeed = 150;
+int leftSpeed = 130;
 int rightSpeed = 150;
 
 boolean run = false;
@@ -64,16 +64,33 @@ void setup() {
 }
 
 void turnAround () {
-  return;
+  while (frontRight.readRangeContinuousMillimeters() < 350){
+    myMotors.pivotLeft(TURN_SPEED);
+  }
+  
+  myMotors.driveStop();
 }
 
 void turnRight () {
-  return;
+  int rightFrontBeforeTurn;
+  rightFrontBeforeTurn = rightFront.readRangeSingleMillimeters();
+  while ((frontLeft.readRangeContinuousMillimeters() < 350) && (frontLeft.readRangeContinuousMillimeters() < (rightFrontBeforeTurn))) {
+    myMotors.pivotRight(TURN_SPEED);
+  }
+  myMotors.driveStop();
+
 }
 
 void turnLeft () {
+  int leftFrontBeforeTurn;
+  leftFrontBeforeTurn = leftFront.readRangeSingleMillimeters();
+  while ( (frontRight.readRangeContinuousMillimeters() < 350) && (frontRight.readRangeContinuousMillimeters() < (leftFrontBeforeTurn))){
+    myMotors.pivotLeft(TURN_SPEED);
+  }
   
+  myMotors.driveStop();
 }
+
 
 void driveForward(){
   int newLeftSpeed;
@@ -84,37 +101,45 @@ void driveForward(){
   // todo: this will not catch right turns that are available when the front is open
   bool blockedFront = false;
   while (!blockedFront) {
-    rightFrontSensorReading = rightFront.readRangeSingleMillimeters();
-    leftFrontSensorReading = leftFront.readRangeSingleMillimeters();
-    
-    if (rightFrontSensorReading < 175){
-      newRightSpeed = 225;
+    if (rightFront.readRangeContinuousMillimeters() < 100){
+      newRightSpeed = 185;
     } else {
       newRightSpeed = 100;
     }
-    if (leftFrontSensorReading < 175){
-      newLeftSpeed = 225;
+    if (leftFront.readRangeContinuousMillimeters() < 100){
+      newLeftSpeed = 165;
     } else {
       newLeftSpeed = 100;
     }
     myMotors.driveForward(newRightSpeed, newLeftSpeed);
-
-    blockedFront = (frontRight.readRangeSingleMillimeters() < 200) && (frontLeft.readRangeSingleMillimeters() < 200);
+ //front left sensor is not working
+    blockedFront = ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100));
   }
-
+  myMotors.driveStop();
   // todo: figure these out at run time.
-  bool blockedRight = true;
-  bool blockedLeft = true;
-  if (blockedFront && blockedRight && blockedLeft) {
+  delay(1000);
+
+  if ( (frontRight.readRangeContinuousMillimeters() < 125) && (frontLeft.readRangeContinuousMillimeters() < 125) && (rightBack.readRangeContinuousMillimeters() < 200) && (leftBack.readRangeContinuousMillimeters() < 200) ) {
+    xbeeComm.println("Blocked everywhere.");
     turnAround();
-  } else if (blockedFront && blockedRight && !blockedLeft) {
-    turnLeft();
-  } else if (blockedFront && !blockedRight && blockedLeft) {
-    turnRight();
-  } else if (blockedFront && !blockedRight && !blockedLeft) {
-    turnRight();
-  } else {
-    // bail.
+  } 
+ else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
+   xbeeComm.println("Blocked only in the Front.");
+   myMotors.turnRight(TURN_SPEED);
+   //turnRight();
+  } 
+  else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() < 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
+    xbeeComm.println("Blocked Front and Right.");
+    myMotors.turnLeft(TURN_SPEED);
+    //turnLeft();
+  }  
+  else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() < 350)) {
+    xbeeComm.println("Blocked Front and Left.");
+    myMotors.turnRight(TURN_SPEED);
+   // turnRight();
+   }
+  else {
+    myMotors.driveStop();
   }
 }
 
@@ -166,10 +191,20 @@ void loop() {
 
       case 'm':
         Serial.println("Measurement");
-        byte distances[3];
-        //distances[0] = (byte) pingFront.getDistanceInCm();
-        
-        xbeeComm.write(distances, sizeof(distances)/sizeof(byte));
+          xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
+  if (leftBack.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+  xbeeComm.print("LF - " + String(leftFront.readRangeContinuousMillimeters()) + " | ");
+  if (leftFront.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+  xbeeComm.print("FL - " + String(frontLeft.readRangeContinuousMillimeters()) + " | ");
+  if (frontLeft.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+  xbeeComm.print("FR - " + String(frontRight.readRangeContinuousMillimeters()) + " | ");
+  if (frontRight.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+  xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
+  if (rightFront.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+  xbeeComm.print("RF - " + String(rightFront.readRangeContinuousMillimeters()) + " | ");
+  if (rightBack.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+  xbeeComm.println();
+  delay(100);
         break;
         
       default:

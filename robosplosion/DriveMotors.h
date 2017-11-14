@@ -6,7 +6,7 @@
 
 #define DRIVE_SPEED_CRUISE  128
 #define DRIVE_REVERSE_SPEED 128
-#define TURN_SPEED          128
+#define TURN_SPEED          110
 
 #include "Arduino.h"
 
@@ -26,6 +26,7 @@ class DriveMotors {
     void pivotLeft(const byte speed);
     void pivotRight(const byte speed);
     void turnLeft(const byte speed);
+    void turnAround(const byte speed);
     void turnRight(const byte speed);
 };
 

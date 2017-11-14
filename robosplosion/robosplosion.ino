@@ -120,21 +120,21 @@ void driveForward(){
   delay(1000);
 
   if ( (frontRight.readRangeContinuousMillimeters() < 125) && (frontLeft.readRangeContinuousMillimeters() < 125) && (rightBack.readRangeContinuousMillimeters() < 200) && (leftBack.readRangeContinuousMillimeters() < 200) ) {
-    xbeeComm.println("Blocked everywhere.");
+    log("Blocked everywhere.");
     turnAround();
   } 
  else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
-   xbeeComm.println("Blocked only in the Front.");
+   log("Blocked only in the Front.");
    myMotors.turnRight(TURN_SPEED);
    //turnRight();
   } 
   else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() < 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
-    xbeeComm.println("Blocked Front and Right.");
+    log("Blocked Front and Right.");
     myMotors.turnLeft(TURN_SPEED);
     //turnLeft();
   }  
   else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() < 350)) {
-    xbeeComm.println("Blocked Front and Left.");
+    log("Blocked Front and Left.");
     myMotors.turnRight(TURN_SPEED);
    // turnRight();
    }
@@ -146,7 +146,7 @@ void driveForward(){
 bool loggingOn = false;
 void log (String message) {
     if (loggingOn) {
-        xbeeCom.println(message);
+        xbeeComm.println(message);
     }
 }
 
@@ -166,7 +166,7 @@ void loop() {
         break;
 
       case 'w':
-        xbeeComm.println("Drive forward");
+        log("Drive forward");
         driveForward();
         myMotors.driveStop();
         break;
@@ -199,19 +199,19 @@ void loop() {
       case 'm':
         Serial.println("Measurement");
           xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
-  if (leftBack.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
-  xbeeComm.print("LF - " + String(leftFront.readRangeContinuousMillimeters()) + " | ");
-  if (leftFront.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
-  xbeeComm.print("FL - " + String(frontLeft.readRangeContinuousMillimeters()) + " | ");
-  if (frontLeft.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
-  xbeeComm.print("FR - " + String(frontRight.readRangeContinuousMillimeters()) + " | ");
-  if (frontRight.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
-  xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
-  if (rightFront.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
-  xbeeComm.print("RF - " + String(rightFront.readRangeContinuousMillimeters()) + " | ");
-  if (rightBack.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
-  xbeeComm.println();
-  delay(100);
+          if (leftBack.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+          xbeeComm.print("LF - " + String(leftFront.readRangeContinuousMillimeters()) + " | ");
+          if (leftFront.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+          xbeeComm.print("FL - " + String(frontLeft.readRangeContinuousMillimeters()) + " | ");
+          if (frontLeft.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+          xbeeComm.print("FR - " + String(frontRight.readRangeContinuousMillimeters()) + " | ");
+          if (frontRight.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+          xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
+          if (rightFront.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+          xbeeComm.print("RF - " + String(rightFront.readRangeContinuousMillimeters()) + " | ");
+          if (rightBack.timeoutOccurred()) { Serial.print(" TIMEOUT "); }
+          log();
+          delay(100);
         break;
         
       default:

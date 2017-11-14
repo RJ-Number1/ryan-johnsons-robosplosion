@@ -76,6 +76,13 @@ void setup() {
     rightBack.startContinuous();
 }
 
+bool logging = false;
+void log (String output) {
+    if (logging) {
+        xbeeComm.println(output);
+    }
+}
+
 void printDistance () {
     log((String) "LB " + leftBack.readRangeSingleMillimeters() +
                 " | LF " + leftFront.readRangeSingleMillimeters() +
@@ -104,22 +111,6 @@ void driveStraight(int driverSide, int passengerSide) {
     log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
 
     myMotors.drive(leftSpeed, rightSpeed);
-}
-
-bool logging = false;
-void log (String output) {
-    if (logging) {
-        xbeeComm.println(output);
-    }
-}
-
-void readSensorData() {
-    sensDriverFront = leftFront.readRangeSingleMillimeters();
-    sensDriverBack = leftBack.readRangeSingleMillimeters();
-    sensPassFront = rightFront.readRangeSingleMillimeters();
-    sensPassBack = rightBack.readRangeSingleMillimeters();
-    sensFrontLeft = frontLeft.readRangeSingleMillimeters();
-    sensFrontRight = frontRight.readRangeSingleMillimeters();
 }
 
 bool displayDistances = false;
@@ -154,6 +145,14 @@ void readUserInput() {
         }
     }
 }
+void readSensorData() {
+    sensDriverFront = leftFront.readRangeSingleMillimeters();
+    sensDriverBack = leftBack.readRangeSingleMillimeters();
+    sensPassFront = rightFront.readRangeSingleMillimeters();
+    sensPassBack = rightBack.readRangeSingleMillimeters();
+    sensFrontLeft = frontLeft.readRangeSingleMillimeters();
+    sensFrontRight = frontRight.readRangeSingleMillimeters();
+}
 
 void pivotRobot (int speed) {
     log((String) "LeftSpeed: " + speed / 2 + " | RightSpeed: " + -speed);
@@ -164,7 +163,7 @@ void turnAround () {
     readUserInput();
     readSensorData();
 
-    while(wallInFront && !stopped) {
+    while (wallInFront && !stopped) {
         emergencyBackup = sensFrontLeft < 50 || sensFrontRight < 50;
         wallInFront = sensFrontLeft < 300 && sensFrontRight < 300;
         if (emergencyBackup) {
@@ -266,7 +265,9 @@ void loop() {
     } else if (stopped) {
         myMotors.driveStop();
     } else if (!stopped) {
-        ryansAlgorithm();
+//        ryansAlgorithm();
+        driveStraight(sensFrontLeft, sensFrontRight);
     }
+
 }
 

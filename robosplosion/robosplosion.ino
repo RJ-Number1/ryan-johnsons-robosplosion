@@ -64,8 +64,9 @@ void setup() {
 }
 void loop() {
   newByte = xbeeComm.read();
-  int frontRightSensorReading = leftBack.readRangeSingleMillimeters();
-  int frontLeftSensorReading = rightBack.readRangeSingleMillimeters();
+  int frontRightSensorReading = rightFront.readRangeSingleMillimeters();
+  int frontLeftSensorReading = leftFront.readRangeSingleMillimeters();
+  
   int newLeftSpeed;
   int newRightSpeed;
   if (frontRightSensorReading < 175){
@@ -82,6 +83,7 @@ void loop() {
     }
   
    if(run){
+    
      xbeeComm.println((String)"LeftSpeed " + newLeftSpeed);
      xbeeComm.println((String)"RightSpeed " + newRightSpeed);
      myMotors.driveForward(newRightSpeed, newLeftSpeed);

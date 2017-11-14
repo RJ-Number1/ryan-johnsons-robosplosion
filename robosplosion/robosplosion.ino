@@ -108,9 +108,7 @@ void handleRightFork () {
   while ((leftBack.readRangeContinuousMillimeters() < frontLeftBeforePivot)) {
     myMotors.pivotRight(TURN_SPEED);
   }
-  int averageFrontReadings = (frontLeft.readRangeContinuousMillimeters() - 200);
-
-  while ((leftBack.readRangeContinuousMillimeters()<350)&&(rightBack.readRangeContinuousMillimeters()<350)){
+  while ((leftBack.readRangeContinuousMillimeters()>250)&&(rightBack.readRangeContinuousMillimeters()>250)){
     courseCorrecting();
   }
   myMotors.driveStop();

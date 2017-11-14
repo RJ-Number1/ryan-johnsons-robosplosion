@@ -80,8 +80,8 @@ void turnAround () {
 
 void turnRight () {
   int rightFrontBeforeTurn;
-  rightFrontBeforeTurn = rightFront.readRangeSingleMillimeters();
-  while ((frontLeft.readRangeContinuousMillimeters() < 350) && (frontLeft.readRangeContinuousMillimeters() < (rightFrontBeforeTurn))) {
+  rightFrontBeforeTurn = rightFront.readRangeContinuousMillimeters();
+  while ((frontLeft.readRangeContinuousMillimeters() < (rightFrontBeforeTurn))) {
     myMotors.pivotRight(TURN_SPEED);
   }
   myMotors.driveStop();
@@ -90,25 +90,38 @@ void turnRight () {
 
 void turnLeft () {
   int leftFrontBeforeTurn;
-  leftFrontBeforeTurn = leftFront.readRangeSingleMillimeters();
-  while ( (frontRight.readRangeContinuousMillimeters() < 350) && (frontRight.readRangeContinuousMillimeters() < (leftFrontBeforeTurn))){
+  leftFrontBeforeTurn = leftFront.readRangeContinuousMillimeters();
+  while ((frontRight.readRangeContinuousMillimeters() < (leftFrontBeforeTurn))){
     myMotors.pivotLeft(TURN_SPEED);
   }
   
   myMotors.driveStop();
 }
 
+void handleRightFork () {
+  int averageFrontReadings = (frontLeft.readRangeContinuousMillimeters() - 200);
 
-void driveForward(){
+  while (((frontLeft.readRangeContinuousMillimeters() + frontRight.readRangeContinuousMillimeters()) / 2) >= averageFrontReadings){
+    courseCorrecting();
+  }
+  
+  int frontLeftBeforePivot = frontLeft.readRangeContinuousMillimeters();
+  while ((leftBack.readRangeContinuousMillimeters() < frontLeftBeforePivot)) {
+    myMotors.pivotRight(TURN_SPEED);
+  }
+
+  while (leftBack.readRangeContinuousMillimeters() > 350 && rightBack.readRangeContinuousMillimeters() > 350) {
+    courseCorrecting();
+  }
+
+  myMotors.driveStop();
+}
+
+void courseCorrecting () {
   int newLeftSpeed;
   int newRightSpeed;
-  int rightFrontSensorReading;
-  int leftFrontSensorReading; 
-
-  bool blockedFront = false;
-  bool blockedRight = true;
-  while (!blockedFront && blockedRight) {
-    if (rightFront.readRangeContinuousMillimeters() < 100){
+  
+  if (rightFront.readRangeContinuousMillimeters() < 100){
       newRightSpeed = 185;
     } else {
       newRightSpeed = 100;
@@ -118,10 +131,27 @@ void driveForward(){
     } else {
       newLeftSpeed = 100;
     }
+
     myMotors.driveForward(newRightSpeed, newLeftSpeed);
- //front left sensor is not working
+}
+
+void driveForward(){
+  int rightFrontSensorReading;
+  int leftFrontSensorReading; 
+
+  bool blockedFront = false;
+  bool blockedRight = true;
+  while (!blockedFront) {
+    
+    if (!blockedRight) {
+      delay(200);
+      break;
+    }
+    
+    courseCorrecting();
+    
     blockedFront = ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100));
-    blockedRight = ((rightBack.readRangeContinuousMillimeters() < 200));
+    blockedRight = ((rightBack.readRangeContinuousMillimeters() < 350));
   }
   myMotors.driveStop();
   // todo: figure these out at run time.
@@ -143,7 +173,12 @@ void driveForward(){
     log("Blocked Front and Left.");
     turnRight();
    }
+  else if (rightBack.readRangeContinuousMillimeters() > 350 && (leftBack.readRangeContinuousMillimeters() < 300)) {
+    log("Blocked only on Left.");
+    handleRightFork();
+  }
   else {
+    log("Unknown state. Stopping");
     myMotors.driveStop();
   }
 }
@@ -230,6 +265,8 @@ void loop() {
         myMotors.driveReverse(DRIVE_REVERSE_SPEED);
         break;
 
+      case 'l':
+        loggingOn = !loggingOn;
       case 'm':
         printMeasurements();
         break;

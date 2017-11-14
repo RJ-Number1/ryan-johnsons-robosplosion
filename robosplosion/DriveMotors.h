@@ -6,7 +6,7 @@
 
 #define DRIVE_SPEED_CRUISE  128
 #define DRIVE_REVERSE_SPEED 128
-#define TURN_SPEED          110
+#define TURN_SPEED          90
 
 #include "Arduino.h"
 

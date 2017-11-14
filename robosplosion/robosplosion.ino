@@ -99,21 +99,15 @@ void turnLeft () {
 }
 
 void handleRightFork () {
+  int frontLeftBeforePivot = frontLeft.readRangeContinuousMillimeters();
+  while ((leftBack.readRangeContinuousMillimeters() < frontLeftBeforePivot)) {
+    myMotors.pivotRight(TURN_SPEED);
+  }
   int averageFrontReadings = (frontLeft.readRangeContinuousMillimeters() - 200);
 
   while (((frontLeft.readRangeContinuousMillimeters() + frontRight.readRangeContinuousMillimeters()) / 2) >= averageFrontReadings){
     courseCorrecting();
   }
-  
-  int frontLeftBeforePivot = frontLeft.readRangeContinuousMillimeters();
-  while ((leftBack.readRangeContinuousMillimeters() < frontLeftBeforePivot)) {
-    myMotors.pivotRight(TURN_SPEED);
-  }
-
-  while (leftBack.readRangeContinuousMillimeters() > 350 && rightBack.readRangeContinuousMillimeters() > 350) {
-    courseCorrecting();
-  }
-
   myMotors.driveStop();
 }
 

@@ -148,6 +148,42 @@ void log (String message) {
     }
 }
 
+void printMeasurements () {
+  Serial.println("Measurement");
+  xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
+  if (leftBack.timeoutOccurred()) {
+    Serial.print(" TIMEOUT ");
+  }
+
+  xbeeComm.print("LF - " + String(leftFront.readRangeContinuousMillimeters()) + " | ");
+  if (leftFront.timeoutOccurred()) {
+    Serial.print(" TIMEOUT ");
+  }
+
+  xbeeComm.print("FL - " + String(frontLeft.readRangeContinuousMillimeters()) + " | ");
+  if (frontLeft.timeoutOccurred()) {
+    Serial.print(" TIMEOUT ");
+  }
+
+  xbeeComm.print("FR - " + String(frontRight.readRangeContinuousMillimeters()) + " | ");
+  if (frontRight.timeoutOccurred()) {
+    Serial.print(" TIMEOUT ");
+  }
+
+  xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
+  if (rightFront.timeoutOccurred()) {
+    Serial.print(" TIMEOUT ");
+  }
+
+  xbeeComm.print("RF - " + String(rightFront.readRangeContinuousMillimeters()) + " | ");
+  if (rightBack.timeoutOccurred()) {
+    Serial.print(" TIMEOUT ");
+  }
+
+  log();
+  delay(100);
+}
+
 void loop() {
   newByte = xbeeComm.read();
   if (newByte != -1) {
@@ -195,39 +231,7 @@ void loop() {
         break;
 
       case 'm':
-        Serial.println("Measurement");
-        xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
-        if (leftBack.timeoutOccurred()) {
-            Serial.print(" TIMEOUT ");
-        }
-
-        xbeeComm.print("LF - " + String(leftFront.readRangeContinuousMillimeters()) + " | ");
-        if (leftFront.timeoutOccurred()) {
-            Serial.print(" TIMEOUT ");
-        }
-
-        xbeeComm.print("FL - " + String(frontLeft.readRangeContinuousMillimeters()) + " | ");
-        if (frontLeft.timeoutOccurred()) {
-            Serial.print(" TIMEOUT ");
-        }
-
-        xbeeComm.print("FR - " + String(frontRight.readRangeContinuousMillimeters()) + " | ");
-        if (frontRight.timeoutOccurred()) {
-            Serial.print(" TIMEOUT ");
-        }
-
-        xbeeComm.print("LB - " + String(leftBack.readRangeContinuousMillimeters()) + " | ");
-        if (rightFront.timeoutOccurred()) {
-            Serial.print(" TIMEOUT ");
-        }
-
-        xbeeComm.print("RF - " + String(rightFront.readRangeContinuousMillimeters()) + " | ");
-        if (rightBack.timeoutOccurred()) {
-            Serial.print(" TIMEOUT ");
-        }
-
-        log();
-        delay(100);
+        printMeasurements();
         break;
         
       default:

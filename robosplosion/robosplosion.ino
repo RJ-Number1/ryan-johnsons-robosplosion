@@ -143,6 +143,13 @@ void driveForward(){
   }
 }
 
+bool loggingOn = false;
+void log (String message) {
+    if (loggingOn) {
+        xbeeCom.println(message);
+    }
+}
+
 void loop() {
   newByte = xbeeComm.read();
   if (newByte != -1) {

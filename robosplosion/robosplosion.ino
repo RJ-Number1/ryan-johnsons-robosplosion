@@ -98,9 +98,9 @@ void driveForward(){
   int rightFrontSensorReading;
   int leftFrontSensorReading; 
 
-  // todo: this will not catch right turns that are available when the front is open
   bool blockedFront = false;
-  while (!blockedFront) {
+  bool blockedRight = true;
+  while (!blockedFront && blockedRight) {
     if (rightFront.readRangeContinuousMillimeters() < 100){
       newRightSpeed = 185;
     } else {
@@ -114,6 +114,7 @@ void driveForward(){
     myMotors.driveForward(newRightSpeed, newLeftSpeed);
  //front left sensor is not working
     blockedFront = ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100));
+    blockedRight = ((rightBack.readRangeContinuousMillimeters() < 200));
   }
   myMotors.driveStop();
   // todo: figure these out at run time.

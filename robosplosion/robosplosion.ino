@@ -81,8 +81,11 @@ void turnAround () {
 void turnRight () {
   int rightFrontBeforeTurn;
   rightFrontBeforeTurn = rightFront.readRangeContinuousMillimeters();
-  while ((frontLeft.readRangeContinuousMillimeters() < (rightFrontBeforeTurn))) {
+  while (frontLeft.readRangeContinuousMillimeters() < 350) {
     myMotors.pivotRight(TURN_SPEED);
+  }
+  while (rightBack.readRangeContinuousMillimeters()>200){
+    courseCorrecting();
   }
   myMotors.driveStop();
 
@@ -91,10 +94,12 @@ void turnRight () {
 void turnLeft () {
   int leftFrontBeforeTurn;
   leftFrontBeforeTurn = leftFront.readRangeContinuousMillimeters();
-  while ((frontRight.readRangeContinuousMillimeters() < (leftFrontBeforeTurn))){
+  while (frontRight.readRangeContinuousMillimeters() < 350){
     myMotors.pivotLeft(TURN_SPEED);
   }
-  
+  while (leftBack.readRangeContinuousMillimeters()>200){
+    courseCorrecting();
+  }
   myMotors.driveStop();
 }
 
@@ -105,7 +110,7 @@ void handleRightFork () {
   }
   int averageFrontReadings = (frontLeft.readRangeContinuousMillimeters() - 200);
 
-  while (((frontLeft.readRangeContinuousMillimeters() + frontRight.readRangeContinuousMillimeters()) / 2) >= averageFrontReadings){
+  while ((leftBack.readRangeContinuousMillimeters()<350)&&(rightBack.readRangeContinuousMillimeters()<350)){
     courseCorrecting();
   }
   myMotors.driveStop();
@@ -151,23 +156,23 @@ void driveForward(){
   // todo: figure these out at run time.
   delay(1000);
 
-  if ( (frontRight.readRangeContinuousMillimeters() < 125) && (frontLeft.readRangeContinuousMillimeters() < 125) && (rightBack.readRangeContinuousMillimeters() < 200) && (leftBack.readRangeContinuousMillimeters() < 200) ) {
+  if ( (frontRight.readRangeContinuousMillimeters() < 200) && (frontLeft.readRangeContinuousMillimeters() < 200) && (rightBack.readRangeContinuousMillimeters() < 200) && (leftBack.readRangeContinuousMillimeters() < 200) ) {
     log("Blocked everywhere.");
     turnAround();
   } 
- else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
+ else if ((frontRight.readRangeContinuousMillimeters() < 200) && (frontLeft.readRangeContinuousMillimeters() < 200) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
    log("Blocked only in the Front.");
    turnRight();
   } 
-  else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() < 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
+  else if ((frontRight.readRangeContinuousMillimeters() < 200) && (frontLeft.readRangeContinuousMillimeters() < 200) && (rightBack.readRangeContinuousMillimeters() < 350) && (leftBack.readRangeContinuousMillimeters() > 350)) {
     log("Blocked Front and Right.");
     turnLeft();
   }  
-  else if ((frontRight.readRangeContinuousMillimeters() < 100) && (frontLeft.readRangeContinuousMillimeters() < 100) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() < 350)) {
+  else if ((frontRight.readRangeContinuousMillimeters() < 200) && (frontLeft.readRangeContinuousMillimeters() < 200) && (rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() < 350)) {
     log("Blocked Front and Left.");
     turnRight();
    }
-  else if (rightBack.readRangeContinuousMillimeters() > 350 && (leftBack.readRangeContinuousMillimeters() < 300)) {
+  else if ((rightBack.readRangeContinuousMillimeters() > 350) && (leftBack.readRangeContinuousMillimeters() < 300)) {
     log("Blocked only on Left.");
     handleRightFork();
   }

@@ -85,16 +85,6 @@ void printDistance () {
                 " | RB " + rightBack.readRangeSingleMillimeters());
 }
 
-void driveBackwards (int speed) {
-    log((String) "LeftSpeed: " + -speed + " | RightSpeed: " + -speed);
-    myMotors.drive(-speed, -speed);
-}
-
-void stopDriving() {
-    myMotors.driveStop();
-    //delay(100);
-}
-
 void driveStraight(int driverSide, int passengerSide) {
     int totalSpace = driverSide + passengerSide;
     int baseSpeed = 75;
@@ -114,11 +104,6 @@ void driveStraight(int driverSide, int passengerSide) {
     log((String) "LeftSpeed: " + leftSpeed + " | RightSpeed: " + rightSpeed);
 
     myMotors.drive(leftSpeed, rightSpeed);
-}
-
-void pivotRobot (int speed) {
-    log((String) "LeftSpeed: " + speed / 2 + " | RightSpeed: " + -speed);
-    myMotors.drive(speed / 2, -speed);
 }
 
 bool logging = false;
@@ -168,6 +153,11 @@ void readUserInput() {
                 Serial.println(newByte);
         }
     }
+}
+
+void pivotRobot (int speed) {
+    log((String) "LeftSpeed: " + speed / 2 + " | RightSpeed: " + -speed);
+    myMotors.drive(speed / 2, -speed);
 }
 
 void turnAround () {
